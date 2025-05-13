@@ -1,6 +1,7 @@
 import streamlit as st
 from sqlalchemy import create_engine,Column,String,Integer,ForeignKey
 from sqlalchemy.orm import sessionmaker,declarative_base
+import pandas as pd
 
 db = create_engine("sqlite:///chaveirofinal.db")
 Session = sessionmaker(bind=db)
@@ -36,23 +37,46 @@ def cria_banco():
     print("cria banco")
     Base.metadata.create_all(bind=db)
 
-def vendas():
-    pagamento = st.selectbox("Forma de Pagamento:",("A Vista","Pix","Cartão"))
-    descricao = st.text_area("Descrição:")
-    print(pagamento,descricao)
-    st.button("Submete",on_click=cria_banco)
 
 def lista_vendas():
-    usuario=session.query(Usuario).filter_by(login="joao").first()
-    #usuario=session.query(Usuario).all
-    #print(usuario)
-    print(usuario.nome,usuario.id)
-    st.write(usuario.nome)
+    usuario=session.query(Usuario).filter_by(login="joao")
+    #vendas=session.query(Venda).all()
+    vendas=session.query(Venda).filter_by(vendedor="Joao")
+    print("Usuario:",usuario)
+    #print(usuario.nome,usuario.id)
+    #st.write(usuario.nome)
+    #print(type(usuario))
+    for venda in vendas:
+        print(venda.id,venda.descricao,venda.tipo_pagamento)
+    
+
+    #df = pd.read_sql_query(usuario,con=db)
+    df = pd.read_sql(sql=usuario.statement,con=db)
+    df_vendas = pd.read_sql(sql=vendas.statement,con=db)
+    #df = pd.DataFrame(vendas)
+
+    #st.write(df)
+    #st.dataframe(rows)
+    
+    st.dataframe(df)
+    st.dataframe(df_vendas)
 
 #sidebar
-if st.sidebar.button("Insere Venda"):
-    vendas()
-#if st.sidebar.button("Lista Vendas",on_click=lista_vendas()):
-if st.sidebar.button("Lista Vendas"):
+opcoes_menu = st.sidebar.selectbox("Selecione a opção:",("Insere Vendas","Lista Vendas"))
+
+if opcoes_menu ==  "Insere Vendas":
+    with st.form("form_vendas"):
+        pagamento = st.selectbox("Forma de Pagamento:",("A Vista","Pix","Cartão"))
+        descricao = st.text_area("Descrição:")
+        submit = st.form_submit_button("Submete")
+        print(pagamento,descricao)
+        if submit:
+            #Insert
+            print("Insere")
+            vendas = Venda(tipo_pagamento=pagamento,descricao=descricao,vendedor="Joao")
+            session.add(vendas)
+            session.commit()
+            st.write("##Insere")
+elif opcoes_menu == "Lista Vendas":
     print("botao apertado")
     lista_vendas()
