@@ -1,0 +1,16 @@
+credentials:
+  usernames:
+    joao:
+      email: testando@gmail.com
+      logged_in: false
+      name: Joao Silva
+      password: abcd
+    jose:
+      email: testando@gmail.com
+      logged_in: false
+      name: Jose da Silva
+      password: abcd
+cookie:
+  expiry_days: 1
+  key: random_signature_key
+  name: random_cookie_name
